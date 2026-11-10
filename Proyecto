@@ -1,0 +1,191 @@
+using System;
+
+namespace XD
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+        
+            Console.WriteLine("=========================================");
+            Console.WriteLine("   SISTEMA DE CAJA -        ");
+            Console.WriteLine("=========================================\n");
+
+            // Ventas del día
+            Console.Write("¿Cuántas ventas se van a registrar en el día?: ");
+            int cantidadVentas = int.Parse(Console.ReadLine());
+
+            // Validar que la cantidad de ventas
+            if (cantidadVentas <= 0)
+            {
+                Console.WriteLine("Error: La cantidad de ventas debe ser mayor a cero.");
+                return; // Termina el programa si no es válido
+            }
+
+            // Contadores del resumen diario
+            int ventasRealizadas = 0;
+            int ventasCanceladas = 0;
+            int totalProductosVendidos = 0;
+            double totalVendidoDia = 0;
+            double ventaMasAlta = 0;
+            int numeroVentaMasAlta = 0; // Venta más alta
+            int ventasConDescuento = 0;
+            int contadorEfectivo = 0;
+            int contadorTarjeta = 0;
+            int contadorTransferencia = 0;
+
+            // Ciclo para repetir por cada venta
+            for (int i = 1; i <= cantidadVentas; i++)
+            {
+                Console.WriteLine("\n-----------------------------------------");
+                Console.WriteLine("VENTA NÚMERO " + i);
+                Console.WriteLine("-----------------------------------------");
+
+                Console.Write("¿Cuántos productos tiene esta venta?: ");
+                int cantidadProductos = int.Parse(Console.ReadLine());
+
+                // Validar si la cantidad de productos es correcta
+                if (cantidadProductos <= 0)
+                {
+                    Console.WriteLine("Error: Cantidad de productos inválida. Venta cancelada.");
+                    ventasCanceladas++;
+                    continue; // Salta a la siguiente venta
+                }
+
+                double subtotalVenta = 0;
+                int piezasVentaValidas = 0;
+                
+                // Variable para almacenar el detalle de los productos que se imprimirán en el ticket
+                string detalleProductosTicket = "";
+
+                // Ciclo para registrar cada producto de la venta actual
+                for (int p = 1; p <= cantidadProductos; p++)
+                {
+                    Console.WriteLine("\n--- Producto " + p + " ---");
+                    Console.Write("Nombre del producto: ");
+                    string nombre = Console.ReadLine();
+
+                    Console.Write("Precio unitario: ");
+                    double precio = double.Parse(Console.ReadLine());
+
+                    Console.Write("Cantidad de piezas: ");
+                    int piezas = int.Parse(Console.ReadLine());
+
+                    // Validar que el precio y las piezas sean mayores a cero
+                    if (precio <= 0 || piezas <= 0)
+                    {
+                        Console.WriteLine("Error: Precio o piezas inválidos. Este producto no cuenta.");
+                    }
+                    else
+                    {
+                        double importe = precio * piezas;
+                        subtotalVenta = subtotalVenta + importe;
+                        piezasVentaValidas = piezasVentaValidas + piezas;
+
+                        // Agregamos este producto al texto del ticket
+                        detalleProductosTicket = detalleProductosTicket + "- " + nombre + " | Cant: " + piezas + " | P.Unit: $" + precio + " | Importe: $" + importe + "\n";
+
+                        Console.WriteLine("Importe de este producto: $" + importe);
+                    }
+                }
+
+                // Cálculos de impuestos, descuento y total a pagar
+                double iva = subtotalVenta * 0.16;
+                double totalConIva = subtotalVenta + iva;
+                double descuento = 0;
+
+                // Aplicar 10% de descuento si el total con IVA es mayor a 1000
+                if (totalConIva > 1000)
+                {
+                    descuento = totalConIva * 0.10;
+                    ventasConDescuento++;
+                }
+
+                double totalAPagar = totalConIva - descuento;
+
+                // Selección de la forma de pago
+                Console.WriteLine("\nFormas de pago: 1. Efectivo | 2. Tarjeta | 3. Transferencia");
+                Console.Write("Elige una opción (1-3): ");
+                int formaPago = int.Parse(Console.ReadLine());
+
+                string nombreFormaPago = "";
+
+                if (formaPago == 1)
+                {
+                    nombreFormaPago = "Efectivo";
+                    contadorEfectivo++;
+                }
+                else if (formaPago == 2)
+                {
+                    nombreFormaPago = "Tarjeta";
+                    contadorTarjeta++;
+                }
+                else if (formaPago == 3)
+                {
+                    nombreFormaPago = "Transferencia";
+                    contadorTransferencia++;
+                }
+                else
+                {
+                    Console.WriteLine("Opción inválida. Se registra como Efectivo por defecto.");
+                    nombreFormaPago = "Efectivo";
+                    contadorEfectivo++;
+                }
+
+                // Mostrar Ticket de la venta actual 
+                Console.WriteLine("\n=========================================");
+                Console.WriteLine("            TICKET DE VENTA " + i);
+                Console.WriteLine("=========================================");
+                Console.WriteLine("Detalle de productos:");
+                Console.Write(detalleProductosTicket);
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine("Subtotal: $" + subtotalVenta);
+                Console.WriteLine("IVA (16%): $" + iva);
+                Console.WriteLine("Descuento: $" + descuento);
+                Console.WriteLine("Total a Pagar: $" + totalAPagar);
+                Console.WriteLine("Forma de pago: " + nombreFormaPago);
+                Console.WriteLine("=========================================");
+
+                // Actualizar acumuladores generales del día
+                ventasRealizadas++;
+                totalProductosVendidos = totalProductosVendidos + piezasVentaValidas;
+                totalVendidoDia = totalVendidoDia + totalAPagar;
+
+                // Evaluar cuál fue la venta más alta y guardar su número de venta
+                if (ventasRealizadas == 1 || totalAPagar > ventaMasAlta)
+                {
+                    ventaMasAlta = totalAPagar;
+                    numeroVentaMasAlta = i;
+                }
+            }
+
+            // Resumen Final del Día
+            Console.WriteLine("\n=========================================");
+            Console.WriteLine("             RESUMEN DEL DÍA             ");
+            Console.WriteLine("=========================================");
+            Console.WriteLine("Ventas realizadas: " + ventasRealizadas);
+            Console.WriteLine("Ventas canceladas: " + ventasCanceladas);
+            Console.WriteLine("Total de productos vendidos: " + totalProductosVendidos);
+            Console.WriteLine("Total vendido en el día: $" + totalVendidoDia);
+
+            if (ventasRealizadas > 0)
+            {
+                double promedio = totalVendidoDia / ventasRealizadas;
+                Console.WriteLine("Promedio por venta: $" + promedio);
+                Console.WriteLine("Venta más alta: $" + ventaMasAlta + " (Venta #" + numeroVentaMasAlta + ")");
+            }
+            else
+            {
+                Console.WriteLine("Promedio por venta: $0");
+                Console.WriteLine("Venta más alta: $0");
+            }
+
+            Console.WriteLine("Ventas con descuento: " + ventasConDescuento);
+            Console.WriteLine("Pagos en Efectivo: " + contadorEfectivo);
+            Console.WriteLine("Pagos con Tarjeta: " + contadorTarjeta);
+            Console.WriteLine("Pagos por Transferencia: " + contadorTransferencia);
+            Console.WriteLine("=========================================");
+            Console.WriteLine("¡Gracias por usar el sistema!");
+        }
+    }
+}
